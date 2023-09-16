@@ -20,7 +20,7 @@ int main() {
     }
   
     // Define el estado inicial y los estados posibles
-    enum { INICIAL, L_LLAVE, R_LLAVE, L_CORCHETE, R_CORCHETE, STRING, NUMBER, PR_FALSE, PR_TRUE, PR_NULL, DOS_PUNTOS, COMA } estado = INICIAL;
+    enum { INICIAL, BOOLEAN_T, BOOLEAN_F, STRING, NUMBER, PR_NULL } estado = INICIAL;
 
     char caracter;
 
@@ -41,7 +41,7 @@ int main() {
                 }
                 if (caracter == '"') {
                     estado = STRING;
-                } 
+                }
                 if(caracter == ':') {
                     escribirToken(salida, "DOS_PUNTOS ");
                 } 
@@ -54,13 +54,63 @@ int main() {
                 if (caracter == '\n') {
                     escribirToken(salida, "\n");
                 }
-                break;
+                if (caracter == 'n' || caracter == 'N') {
+                    estado = PR_NULL;
+                }
+                if (caracter == 't' || caracter == 'T') {
+                    estado = BOOLEAN_T;
+                }
+                if(caracter == 'f' || caracter == 'F'){
+                    estado = BOOLEAN_F;
+                }
+                if (isdigit(caracter)) {
+                    estado = NUMBER;
+                }
+            break;
             case STRING:
                 if (caracter == '"') {
                     escribirToken(salida, "STRING ");
                     estado = INICIAL;
                 }
-                break;
+            break;
+            case NUMBER:
+                if (!isdigit(caracter)){
+                    if(caracter == '.' || caracter == 'e' || caracter == 'E'){
+                        estado = INICIAL;
+                    } else {
+                        escribirToken(salida, "NUMBER ");
+                        if(caracter == ','){
+                            escribirToken(salida, "COMA ");
+                        }else if(caracter == '\n'){
+                            escribirToken(salida, "\n");
+                        }else if(caracter == ' '){
+                            escribirToken(salida, " ");
+                        }else {
+                            printf("ERROR DE SINTAXIS");
+                            return 0;
+                        }
+                        estado = INICIAL;
+                    }
+                }
+            break;
+            case BOOLEAN_T:
+                if (caracter == 'e' || caracter == 'E'){
+                    escribirToken(salida, "PR_TRUE ");
+                    estado = INICIAL;
+                }
+            break;
+            case BOOLEAN_F:
+                if (caracter == 'e' || caracter == 'E'){
+                    escribirToken(salida, "PR_FALSE ");
+                    estado = INICIAL;
+                }
+            break;
+            case PR_NULL:
+                if (caracter == 'l' || caracter == 'L'){
+                    escribirToken(salida, "PR_NULL ");
+                    estado = INICIAL;
+                }
+            break;
         }
     }
 
